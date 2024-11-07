@@ -1,8 +1,9 @@
 public struct Button: View, BuiltinView {
     public typealias Body = Never
 
-    var title: String
-    var action: () -> ()
+    public var title: String
+    public var action: () -> ()
+
     public init(_ title: String, action: @escaping () -> ()) {
         self.title = title
         self.action = action

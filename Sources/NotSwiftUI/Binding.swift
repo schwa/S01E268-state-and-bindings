@@ -2,8 +2,8 @@ internal import Foundation
 
 @propertyWrapper
 public struct Binding<Value>: Equatable {
-    var get: () -> Value
-    var set: (Value) -> ()
+    private var get: () -> Value
+    private var set: (Value) -> ()
     private let id = UUID()
 
     public init(get: @escaping () -> Value, set: @escaping (Value) -> Void) {

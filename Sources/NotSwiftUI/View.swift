@@ -4,7 +4,17 @@ public protocol View {
     @MainActor @ViewBuilder var body: Body { get }
 }
 
-extension View {
+extension Never: View {
+    public typealias Body = Never
+}
+
+public extension View where Body == Never {
+    var body: Never {
+        fatalError("`body` is not implemented for `Never` types.")
+    }
+}
+
+internal extension View {
     func observeObjects(_ node: Node) {
         let m = Mirror(reflecting: self)
         for child in m.children {
@@ -82,15 +92,5 @@ extension View {
             guard let prop = value as? StateProperty else { continue }
             node.stateProperties[label!] = prop.value
         }
-    }
-}
-
-extension Never: View {
-    public typealias Body = Never
-}
-
-public extension View where Body == Never {
-    var body: Never {
-        fatalError()
     }
 }

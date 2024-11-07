@@ -23,19 +23,24 @@ public struct State<Value>: StateProperty {
 
     var value: Any {
         get { box.value }
-        nonmutating set { box.value = newValue as! StateBox<Value> }
+        nonmutating set {
+            guard let newBox = newValue as? StateBox<Value> else {
+                fatalError("Expected StateBox<Value> in State.value set")
+            }
+            box.value = newBox
+        }
     }
 }
 
 internal let currentBodies = OSAllocatedUnfairLock<[Node]>(uncheckedState: [])
 
-// var currentBodies: [Node] = []
-
 internal final class StateBox<Value> {
     private var _value: Value
     private var dependencies: [Weak<Node>] = []
-    var binding: Binding<Value> = Binding(get: { fatalError() }, set: { _ in fatalError()
-    })
+    fileprivate var binding: Binding<Value> = Binding(
+        get: { fatalError("Empty Binding: get() called.") },
+        set: { _ in fatalError("Empty Binding: set() called.") }
+    )
 
     init(_ value: Value) {
         self._value = value

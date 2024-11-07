@@ -49,9 +49,9 @@ extension ObservedObject: Equatable {
 }
 
 fileprivate final class ObservedObjectBox<ObjectType: ObservableObject> {
-    var object: ObjectType
-    var cancellable: AnyCancellable?
-    weak var node: Node?
+    fileprivate var object: ObjectType
+    private var cancellable: AnyCancellable?
+    private weak var node: Node?
 
     init(_ object: ObjectType) {
         self.object = object
