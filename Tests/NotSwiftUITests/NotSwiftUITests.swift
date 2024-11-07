@@ -1,6 +1,6 @@
-import Testing
-@testable import NotSwiftUI
 import Combine
+@testable import NotSwiftUI
+import Testing
 
 final class Model: ObservableObject {
     @Published var counter: Int = 0
@@ -37,8 +37,6 @@ var sampleBodyCount = 0
 @Suite(.serialized)
 @MainActor
 struct NotSwiftUIStateTests {
-
-
     init() {
         nestedBodyCount = 0
         contentViewBodyCount = 0
@@ -63,7 +61,7 @@ struct NotSwiftUIStateTests {
         @MainActor struct Nested: View {
             var body: some View {
                 nestedBodyCount += 1
-                return Button("Nested Button", action: {})
+                return Button("Nested Button") {}
             }
         }
 
@@ -99,7 +97,7 @@ struct NotSwiftUIStateTests {
             var counter: Int
             var body: some View {
                 nestedBodyCount += 1
-                return Button("Nested Button", action: {})
+                return Button("Nested Button") {}
             }
         }
 
@@ -135,7 +133,7 @@ struct NotSwiftUIStateTests {
             var isLarge: Bool = false
             var body: some View {
                 nestedBodyCount += 1
-                return Button("Nested Button", action: {})
+                return Button("Nested Button") {}
             }
         }
 
@@ -171,7 +169,7 @@ struct NotSwiftUIStateTests {
             @ObservedObject var model = nestedModel
             var body: some View {
                 nestedBodyCount += 1
-                return Button("Nested Button", action: {})
+                return Button("Nested Button") {}
             }
         }
 
@@ -207,7 +205,7 @@ struct NotSwiftUIStateTests {
             @Binding var counter: Int
             var body: some View {
                 nestedBodyCount += 1
-                return Button("Nested Button", action: {})
+                return Button("Nested Button") {}
             }
         }
 
@@ -243,7 +241,7 @@ struct NotSwiftUIStateTests {
             @Binding var counter: Int
             var body: some View {
                 nestedBodyCount += 1
-                return Button("\(counter)", action: { counter += 1 })
+                return Button("\(counter)") { counter += 1 }
             }
         }
 
@@ -275,7 +273,7 @@ struct NotSwiftUIStateTests {
 
     @Test func testSimple() {
         struct Nested: View {
-            @State var counter = 0
+            @State private var counter = 0
             var body: some View {
                 Button("\(counter)") {
                     counter += 1
@@ -284,7 +282,7 @@ struct NotSwiftUIStateTests {
         }
 
         struct Sample: View {
-            @State var counter = 0
+            @State private var counter = 0
             var body: some View {
                 Button("\(counter)") {
                     counter += 1
@@ -332,7 +330,7 @@ struct NotSwiftUIStateTests {
         }
 
         struct Sample: View {
-            @State var counter = 0
+            @State private var counter = 0
             var body: some View {
                 Nested(counter: $counter)
             }
@@ -367,7 +365,7 @@ struct NotSwiftUIStateTests {
         }
 
         struct Sample: View {
-            @State var counter = 0
+            @State private var counter = 0
             var body: some View {
                 Button("\(counter)") {}
                 Nested(counter: $counter)
@@ -392,6 +390,5 @@ struct NotSwiftUIStateTests {
 
         #expect(sampleBodyCount == 2)
         #expect(nestedBodyCount == 1)
-
     }
 }

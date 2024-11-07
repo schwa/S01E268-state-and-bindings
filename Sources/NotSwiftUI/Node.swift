@@ -1,4 +1,4 @@
-final class Node {
+internal final class Node {
     var children: [Node] = []
     var needsRebuild = true
     var view: BuiltinView!

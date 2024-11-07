@@ -4,7 +4,6 @@ public protocol View {
     @MainActor @ViewBuilder var body: Body { get }
 }
 
-
 extension View {
     func observeObjects(_ node: Node) {
         let m = Mirror(reflecting: self)
@@ -13,7 +12,7 @@ extension View {
             observedObject.addDependency(node)
         }
     }
-    
+
     func equalToPrevious(_ node: Node) -> Bool {
         guard let previous = node.previousView as? Self else { return false }
         let m1 = Mirror(reflecting: self)
@@ -27,7 +26,7 @@ extension View {
         }
         return true
     }
-    
+
     func buildNodeTree(_ node: Node) {
         if let b = self as? BuiltinView {
             node.view = b
@@ -51,23 +50,23 @@ extension View {
             }
             return
         }
-        
+
         node.view = AnyBuiltinView(self)
-        
+
         self.observeObjects(node)
         self.restoreStateProperties(node)
-        
+
         let b = body
         if node.children.isEmpty {
             node.children = [Node()]
         }
         b.buildNodeTree(node.children[0])
-        
+
         self.storeStateProperties(node)
         node.previousView = self
         node.needsRebuild = false
     }
-    
+
     func restoreStateProperties(_ node: Node) {
         let m = Mirror(reflecting: self)
         for (label, value) in m.children {
@@ -87,8 +86,11 @@ extension View {
 }
 
 extension Never: View {
-    public var body: Never {
-        fatalError("We should never reach this")
-    }
+    public typealias Body = Never
 }
 
+public extension View where Body == Never {
+    var body: Never {
+        fatalError()
+    }
+}

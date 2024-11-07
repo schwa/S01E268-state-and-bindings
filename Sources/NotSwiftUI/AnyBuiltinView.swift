@@ -1,5 +1,5 @@
 @MainActor
-struct AnyBuiltinView: BuiltinView {
+internal struct AnyBuiltinView: BuiltinView {
     @MainActor
     private var buildNodeTree: (Node) -> ()
 

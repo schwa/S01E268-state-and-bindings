@@ -1,6 +1,6 @@
 import Combine
 
-protocol AnyObservedObject {
+internal protocol AnyObservedObject {
     @MainActor
     func addDependency(_ node: Node)
 }
@@ -43,7 +43,7 @@ public struct ObservedObject<ObjectType: ObservableObject>: AnyObservedObject {
 }
 
 extension ObservedObject: Equatable {
-    public static func ==(l: ObservedObject, r: ObservedObject) -> Bool {
+    public static func == (l: ObservedObject, r: ObservedObject) -> Bool {
         l.wrappedValue === r.wrappedValue
     }
 }

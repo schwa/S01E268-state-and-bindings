@@ -16,7 +16,7 @@ public struct Binding<Value>: Equatable {
         nonmutating set { set(newValue) }
     }
 
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.id == rhs.id
     }
 }
