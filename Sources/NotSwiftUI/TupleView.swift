@@ -1,19 +1,21 @@
-public struct TupleView: BuiltinView, View {
+public struct TupleView <each T: View>: View, BuiltinView {
     public typealias Body = Never
 
-    var children: [AnyBuiltinView]
+    var children: (repeat each T)
 
-    internal init<V1: View, V2: View>(_ v1: V1, _ v2: V2) {
-        self.children = [AnyBuiltinView(v1), AnyBuiltinView(v2)]
+    public init(_ children: repeat each T) {
+        self.children = (repeat each children)
     }
 
     func _buildNodeTree(_ node: Node) {
-        for idx in children.indices {
+        var idx = 0
+        for child in repeat (each children) {
+            let child = AnyBuiltinView(child)
             if node.children.count <= idx {
                 node.children.append(Node())
             }
-            let child = children[idx]
             child._buildNodeTree(node.children[idx])
+            idx += 1
         }
     }
 }

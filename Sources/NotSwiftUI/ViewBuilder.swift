@@ -5,7 +5,8 @@ public struct ViewBuilder {
         content
     }
 
-    public static func buildBlock<V1: View, V2: View>(_ v1: V1, _ v2: V2) -> TupleView {
-        TupleView(v1, v2)
+    public static func buildBlock<each Content>(_ content: repeat each Content) -> TupleView<repeat each Content> where repeat each Content: View {
+        TupleView(repeat each content)
     }
+
 }
