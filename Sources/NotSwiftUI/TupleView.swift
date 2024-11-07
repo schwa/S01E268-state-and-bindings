@@ -1,7 +1,7 @@
 public struct TupleView <each T: View>: View, BuiltinView {
     public typealias Body = Never
 
-    private var children: (repeat each T)
+    private let children: (repeat each T)
 
     public init(_ children: repeat each T) {
         self.children = (repeat each children)

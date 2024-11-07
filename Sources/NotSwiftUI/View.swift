@@ -15,32 +15,10 @@ public extension View where Body == Never {
 }
 
 internal extension View {
-    func observeObjects(_ node: Node) {
-        let m = Mirror(reflecting: self)
-        for child in m.children {
-            guard let observedObject = child.value as? AnyObservedObject else { return }
-            observedObject.addDependency(node)
-        }
-    }
-
-    func equalToPrevious(_ node: Node) -> Bool {
-        guard let previous = node.previousView as? Self else { return false }
-        let m1 = Mirror(reflecting: self)
-        let m2 = Mirror(reflecting: previous)
-        for pair in zip(m1.children, m2.children) {
-            guard pair.0.label == pair.1.label else { return false }
-            let p1 = pair.0.value
-            let p2 = pair.1.value
-            if p1 is StateProperty { continue }
-            if !isEqual(p1, p2) { return false }
-        }
-        return true
-    }
-
     func buildNodeTree(_ node: Node) {
-        if let b = self as? BuiltinView {
-            node.view = b
-            b._buildNodeTree(node)
+        if let builtInView = self as? BuiltinView {
+            node.view = builtInView
+            builtInView._buildNodeTree(node)
             return
         }
 
@@ -53,7 +31,7 @@ internal extension View {
             }
         }
 
-        let shouldRunBody = node.needsRebuild || !self.equalToPrevious(node)
+        let shouldRunBody = node.needsRebuild || !equalToPrevious(node)
         if !shouldRunBody {
             for child in node.children {
                 child.rebuildIfNeeded()
@@ -63,34 +41,59 @@ internal extension View {
 
         node.view = AnyBuiltinView(self)
 
-        self.observeObjects(node)
-        self.restoreStateProperties(node)
+        observeObjects(node)
+        restoreStateProperties(node)
 
-        let b = body
         if node.children.isEmpty {
             node.children = [Node()]
         }
-        b.buildNodeTree(node.children[0])
+        body.buildNodeTree(node.children[0])
 
-        self.storeStateProperties(node)
+        storeStateProperties(node)
         node.previousView = self
         node.needsRebuild = false
     }
 
-    func restoreStateProperties(_ node: Node) {
-        let m = Mirror(reflecting: self)
-        for (label, value) in m.children {
+    private func equalToPrevious(_ node: Node) -> Bool {
+        guard let previous = node.previousView as? Self else { return false }
+        let lhs = Mirror(reflecting: self).children
+        let rhs = Mirror(reflecting: previous).children
+        return zip(lhs, rhs).allSatisfy { lhs, rhs in
+            guard lhs.label == rhs.label else { return false }
+            if lhs.value is StateProperty { return true }
+            if !isEqual(lhs.value, rhs.value) { return false }
+            return true
+        }
+    }
+
+    private func observeObjects(_ node: Node) {
+        let mirror = Mirror(reflecting: self)
+        for child in mirror.children {
+            guard let observedObject = child.value as? AnyObservedObject else { return }
+            observedObject.addDependency(node)
+        }
+    }
+
+    private func restoreStateProperties(_ node: Node) {
+        let mirror = Mirror(reflecting: self)
+        for (label, value) in mirror.children {
             guard let prop = value as? StateProperty else { continue }
-            guard let propValue = node.stateProperties[label!] else { continue }
+            guard let label else {
+                fatalError("No label for state property.")
+            }
+            guard let propValue = node.stateProperties[label] else { continue }
             prop.value = propValue
         }
     }
 
-    func storeStateProperties(_ node: Node) {
+    private func storeStateProperties(_ node: Node) {
         let m = Mirror(reflecting: self)
         for (label, value) in m.children {
             guard let prop = value as? StateProperty else { continue }
-            node.stateProperties[label!] = prop.value
+            guard let label else {
+                fatalError("No label for state property.")
+            }
+            node.stateProperties[label] = prop.value
         }
     }
 }

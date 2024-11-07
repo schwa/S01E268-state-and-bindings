@@ -49,7 +49,7 @@ extension ObservedObject: Equatable {
 }
 
 fileprivate final class ObservedObjectBox<ObjectType: ObservableObject> {
-    fileprivate var object: ObjectType
+    fileprivate let object: ObjectType
     private var cancellable: AnyCancellable?
     private weak var node: Node?
 
