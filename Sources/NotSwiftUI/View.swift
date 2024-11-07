@@ -1,3 +1,5 @@
+internal import os
+
 @MainActor
 public protocol View {
     associatedtype Body: View
@@ -13,6 +15,8 @@ public extension View where Body == Never {
         fatalError("`body` is not implemented for `Never` types.")
     }
 }
+
+internal let currentBodies = OSAllocatedUnfairLock<[Node]>(uncheckedState: [])
 
 internal extension View {
     func buildNodeTree(_ node: Node) {

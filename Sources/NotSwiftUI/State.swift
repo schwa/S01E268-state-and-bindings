@@ -1,7 +1,3 @@
-internal import os
-
-internal let currentBodies = OSAllocatedUnfairLock<[Node]>(uncheckedState: [])
-
 internal protocol StateProperty {
     var value: Any { get nonmutating set }
 }
