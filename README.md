@@ -1,6 +1,6 @@
 # NotSwiftUI
 
-Objc.io's series of Swift talks about SwiftUI internals provide an excellent glimpse into how SwiftUI works under the hood. This repository takes the example code they produced in that series and modernises it for Swift 6. Portions of the code are copyright Objc.io and portions are copyright Jonathan Wight. The license is still the original MIT license.
+[Objc.io](https://www.objc.io)'s series of Swift talks about SwiftUI internals provide an excellent glimpse into how SwiftUI works under the hood. This repository takes the example code they produced in that series and modernises it for Swift 6. Portions of the code are copyright Objc.io and portions are copyright Jonathan Wight. The license is still the original MIT license.
 
 ## Modernisation
 
