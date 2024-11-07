@@ -9,4 +9,7 @@ public struct ViewBuilder {
         TupleView(repeat each content)
     }
 
+    public static func buildOptional<Content>(_ content: Content?) -> some View where Content: View {
+        content
+    }
 }
