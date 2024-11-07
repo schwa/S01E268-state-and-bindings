@@ -2,6 +2,22 @@ import Combine
 @testable import NotSwiftUI
 import Testing
 
+struct Button: View, BuiltinView {
+    typealias Body = Never
+
+    var title: String
+    var action: () -> ()
+
+    init(_ title: String, action: @escaping () -> ()) {
+        self.title = title
+        self.action = action
+    }
+
+    func _buildNodeTree(_ node: Node) {
+        // todo create a UIButton
+    }
+}
+
 final class Model: ObservableObject {
     @Published var counter: Int = 0
 }
