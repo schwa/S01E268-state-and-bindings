@@ -18,9 +18,10 @@ Here's what's changed from the original:
 
 ## Possible Future Work
 
-- Eliminate the global state if at all possible.
-- Add in support for Observation.
 - Add support for environment.
+- Eliminate the global state if at all possible.
+- Replace Swift @propertyWrapper with Macros where sensible.
+- Add in support for Observation (get rid of ObservedObject))
 
 ## Objc.io's SwiftUI State Explained Series
 
