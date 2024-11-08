@@ -17,8 +17,9 @@ internal class Graph {
     @MainActor
     func rebuildIfNeeded() {
         Self.current = self
+
         root.view!._buildNodeTree(root)
-        Self.current = nil
+       Self.current = nil
     }
 
     static let _current = OSAllocatedUnfairLock<Graph?>(uncheckedState: nil)
