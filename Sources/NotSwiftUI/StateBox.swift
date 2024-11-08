@@ -21,7 +21,6 @@ internal final class StateBox<Value> {
             if graph == nil {
                 graph = Graph.current
             }
-
             // Remove lazy values whose nodes have been deallocated
             dependencies = dependencies.filter { $0.value != nil }
             if let node = graph!.activeNodeStack.last, dependencies.contains(where: { $0.value === node }) == false {
@@ -34,9 +33,7 @@ internal final class StateBox<Value> {
                 graph = Graph.current
             }
             _value = newValue
-            for d in dependencies {
-                d.value?.setNeedsRebuild()
-            }
+            dependencies.compactMap { $0.value }.forEach { $0.setNeedsRebuild() }
         }
     }
 }

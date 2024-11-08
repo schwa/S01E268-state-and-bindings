@@ -5,25 +5,11 @@ internal protocol AnyObservedObject {
     func addDependency(_ node: Node)
 }
 
+// MARK: -
+
 @propertyWrapper
-public struct ObservedObject<ObjectType: ObservableObject>: AnyObservedObject {
+public struct ObservedObject<ObjectType: ObservableObject> {
     private var box: ObservedObjectBox<ObjectType>
-
-    @dynamicMemberLookup
-    public struct Wrapper {
-        private var observedObject: ObservedObject<ObjectType>
-        fileprivate init(_ o: ObservedObject<ObjectType>) {
-            observedObject = o
-        }
-
-        subscript<Value>(dynamicMember keyPath: ReferenceWritableKeyPath<ObjectType, Value>) -> Binding<Value> {
-            Binding(get: {
-                observedObject.wrappedValue[keyPath: keyPath]
-            }, set: {
-                observedObject.wrappedValue[keyPath: keyPath] = $0
-            })
-        }
-    }
 
     public init(wrappedValue: ObjectType) {
         box = ObservedObjectBox(wrappedValue)
@@ -33,12 +19,8 @@ public struct ObservedObject<ObjectType: ObservableObject>: AnyObservedObject {
         box.object
     }
 
-    public var projectedValue: Self.Wrapper {
-        Wrapper(self)
-    }
-
-    func addDependency(_ node: Node) {
-        box.addDependency(node)
+    public var projectedValue: ProjectedValue<ObjectType> {
+        .init(self)
     }
 }
 
@@ -47,6 +29,14 @@ extension ObservedObject: Equatable {
         l.wrappedValue === r.wrappedValue
     }
 }
+
+extension ObservedObject: AnyObservedObject {
+    func addDependency(_ node: Node) {
+        box.addDependency(node)
+    }
+}
+
+// MARK: -
 
 fileprivate final class ObservedObjectBox<ObjectType: ObservableObject> {
     fileprivate let object: ObjectType
@@ -64,5 +54,24 @@ fileprivate final class ObservedObjectBox<ObjectType: ObservableObject> {
         cancellable = object.objectWillChange.sink { _ in
             node.setNeedsRebuild()
         }
+    }
+}
+
+// MARK: -
+
+@dynamicMemberLookup
+public struct ProjectedValue <ObjectType: ObservableObject> {
+    private var observedObject: ObservedObject<ObjectType>
+
+    fileprivate init(_ observedObject: ObservedObject<ObjectType>) {
+        self.observedObject = observedObject
+    }
+
+    public subscript<Value>(dynamicMember keyPath: ReferenceWritableKeyPath<ObjectType, Value>) -> Binding<Value> {
+        Binding(get: {
+            observedObject.wrappedValue[keyPath: keyPath]
+        }, set: {
+            observedObject.wrappedValue[keyPath: keyPath] = $0
+        })
     }
 }
