@@ -16,7 +16,7 @@ public extension View where Body == Never {
     }
 }
 
-internal let currentBodies = OSAllocatedUnfairLock<[Node]>(uncheckedState: [])
+internal let activeNodeStack = OSAllocatedUnfairLock<[Node]>(uncheckedState: [])
 
 internal extension View {
     func buildNodeTree(_ node: Node) {
@@ -26,12 +26,12 @@ internal extension View {
             return
         }
 
-        currentBodies.withLockUnchecked { currentBodies in
-            currentBodies.append(node)
+        activeNodeStack.withLockUnchecked { activeNodeStack in
+            activeNodeStack.append(node)
         }
         defer {
-            currentBodies.withLockUnchecked { currentBodies in
-                _ = currentBodies.removeLast()
+            activeNodeStack.withLockUnchecked { activeNodeStack in
+                _ = activeNodeStack.removeLast()
             }
         }
 
