@@ -5,6 +5,7 @@ internal final class Node {
     var view: BuiltinView?
     var previousView: Any?
     var stateProperties: [String: Any] = [:]
+    var environmentValues = EnvironmentValues()
 
     init() {
     }

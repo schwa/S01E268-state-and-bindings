@@ -401,4 +401,59 @@ struct NotSwiftUIStateTests {
         #expect(sampleBodyCount == 2)
         #expect(nestedBodyCount == 1)
     }
+
+    // Environment Tests
+
+    @Test func testEnvironment1() {
+        struct Example1: View {
+            var body: some View {
+                EmptyView()
+                    .environment(\.exampleValue, "Hello world")
+            }
+        }
+
+        let s = Example1()
+        let graph = Graph(content: s)
+        graph.root.dump()
+        print(graph.root.environmentValues)
+        print(graph.root.children[0].environmentValues)
+    }
+
+    @Test func testEnvironment2() {
+        struct Example1: View {
+            var body: some View {
+                EmptyView()
+                    .environment(\.exampleValue, "Hello world")
+            }
+        }
+
+        struct Example2: View {
+            @Environment(\.exampleValue) var exampleValue
+
+            var body: some View {
+                EmptyView()
+            }
+        }
+
+        let s = Example1()
+        let graph = Graph(content: s)
+        graph.root.dump()
+        print(graph.root.environmentValues)
+        print(graph.root.children[0].environmentValues)
+    }
+}
+
+struct ExampleKey: EnvironmentKey {
+    static let defaultValue = ""
+}
+
+extension EnvironmentValues {
+    var exampleValue: String {
+        get {
+            self[ExampleKey.self]
+        }
+        set {
+            self[ExampleKey.self] = newValue
+        }
+    }
 }
