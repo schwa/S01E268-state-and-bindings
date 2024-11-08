@@ -1,20 +1,21 @@
 import Combine
 
 protocol AnyObservedObject {
+    @MainActor
     func addDependency(_ node: Node)
 }
 
 @propertyWrapper
-struct ObservedObject<ObjectType: ObservableObject>: AnyObservedObject {
+public struct ObservedObject<ObjectType: ObservableObject>: AnyObservedObject {
     private var box: ObservedObjectBox<ObjectType>
-    
+
     @dynamicMemberLookup
-    struct Wrapper {
+    public struct Wrapper {
         private var observedObject: ObservedObject<ObjectType>
         fileprivate init(_ o: ObservedObject<ObjectType>) {
             observedObject = o
         }
-        
+
         subscript<Value>(dynamicMember keyPath: ReferenceWritableKeyPath<ObjectType, Value>) -> Binding<Value> {
             Binding(get: {
                 observedObject.wrappedValue[keyPath: keyPath]
@@ -23,26 +24,26 @@ struct ObservedObject<ObjectType: ObservableObject>: AnyObservedObject {
             })
         }
     }
-    
-    init(wrappedValue: ObjectType) {
+
+    public init(wrappedValue: ObjectType) {
         box = ObservedObjectBox(wrappedValue)
     }
-    
-    var wrappedValue: ObjectType {
+
+    public var wrappedValue: ObjectType {
         box.object
     }
-    
-    var projectedValue: Self.Wrapper {
+
+    public var projectedValue: Self.Wrapper {
         Wrapper(self)
     }
-    
+
     func addDependency(_ node: Node) {
         box.addDependency(node)
     }
 }
 
 extension ObservedObject: Equatable {
-    static func ==(l: ObservedObject, r: ObservedObject) -> Bool {
+    public static func ==(l: ObservedObject, r: ObservedObject) -> Bool {
         l.wrappedValue === r.wrappedValue
     }
 }
@@ -51,16 +52,17 @@ fileprivate final class ObservedObjectBox<ObjectType: ObservableObject> {
     var object: ObjectType
     var cancellable: AnyCancellable?
     weak var node: Node?
-    
+
     init(_ object: ObjectType) {
         self.object = object
     }
-    
+
+    @MainActor
     func addDependency(_ node: Node) {
         if node === self.node { return }
         self.node = node
         cancellable = object.objectWillChange.sink { _ in
-            node.needsRebuild = true
+            node.setNeedsRebuild()
         }
     }
 }

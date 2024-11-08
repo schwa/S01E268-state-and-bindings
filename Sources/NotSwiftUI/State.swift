@@ -1,54 +1,41 @@
-//
-//  File.swift
-//  
-//
-//  Created by Chris Eidhof on 24.06.21.
-//
-
-import Foundation
+internal import os
 
 protocol StateProperty {
     var value: Any { get nonmutating set }
 }
 
 @propertyWrapper
-struct State<Value>: StateProperty {
+public struct State<Value>: StateProperty {
     private var box: Box<StateBox<Value>>
-    
-    init(wrappedValue: Value) {
+
+    public init(wrappedValue: Value) {
         self.box = Box(StateBox(wrappedValue))
     }
-    
-    var wrappedValue: Value {
+
+    public var wrappedValue: Value {
         get { box.value.value }
         nonmutating set { box.value.value = newValue }
     }
-    
-    var projectedValue: Binding<Value> {
+
+    public var projectedValue: Binding<Value> {
         box.value.binding
     }
-    
+
     var value: Any {
         get { box.value }
         nonmutating set { box.value = newValue as! StateBox<Value> }
     }
 }
 
-final class Box<Value> {
-    var value: Value
-    init(_ value: Value) {
-        self.value = value
-    }
-}
+let currentBodies = OSAllocatedUnfairLock<[Node]>(uncheckedState: [])
 
-var currentBodies: [Node] = []
-var currentGlobalBodyNode: Node? { currentBodies.last }
+//var currentBodies: [Node] = []
 
 final class StateBox<Value> {
     private var _value: Value
     private var dependencies: [Weak<Node>] = []
     var binding: Binding<Value> = Binding(get: { fatalError() }, set: { _ in fatalError() })
-    
+
     init(_ value: Value) {
         self._value = value
         self.binding = Binding(get: { [unowned self] in
@@ -57,27 +44,22 @@ final class StateBox<Value> {
             self.value = $0
         })
     }
-    
+
     var value: Value {
         get {
-            if let node = currentGlobalBodyNode {
-                dependencies.append(Weak(node))
+            currentBodies.withLockUnchecked { currentBodies in
+                if let node = currentBodies.last {
+                    dependencies.append(Weak(node))
+                }
+                // skip duplicates and remove nil entries?
+                return _value
             }
-            // skip duplicates and remove nil entries?
-            return _value
         }
         set {
             _value = newValue
             for d in dependencies {
-                d.value?.needsRebuild = true
+                d.value?.setNeedsRebuild()
             }
         }
-    }
-}
-
-final class Weak<A: AnyObject> {
-    weak var value: A?
-    init(_ value: A) {
-        self.value = value
     }
 }

@@ -1,4 +1,5 @@
 @resultBuilder
+@MainActor
 struct ViewBuilder {
     static func buildBlock<V: View>(_ content: V) -> V {
         content

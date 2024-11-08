@@ -1,11 +1,9 @@
-protocol View {
+@MainActor
+public protocol View {
     associatedtype Body: View
-    @ViewBuilder var body: Body { get }
+    @MainActor @ViewBuilder var body: Body { get }
 }
 
-protocol BuiltinView {
-    func _buildNodeTree(_ node: Node)
-}
 
 extension View {
     func observeObjects(_ node: Node) {
@@ -36,10 +34,16 @@ extension View {
             b._buildNodeTree(node)
             return
         }
-        
-        currentBodies.append(node)
-        defer { currentBodies.removeLast() }
-        
+
+        currentBodies.withLockUnchecked { currentBodies in
+            currentBodies.append(node)
+        }
+        defer {
+            currentBodies.withLockUnchecked { currentBodies in
+                _ = currentBodies.removeLast()
+            }
+        }
+
         let shouldRunBody = node.needsRebuild || !self.equalToPrevious(node)
         if !shouldRunBody {
             for child in node.children {
@@ -83,26 +87,8 @@ extension View {
 }
 
 extension Never: View {
-    var body: Never {
+    public var body: Never {
         fatalError("We should never reach this")
     }
 }
 
-extension BuiltinView {
-    var body: Never {
-        fatalError("This should never happen")
-    }
-}
-
-struct Button: View, BuiltinView {
-    var title: String
-    var action: () -> ()
-    init(_ title: String, action: @escaping () -> ()) {
-        self.title = title
-        self.action = action
-    }
-    
-    func _buildNodeTree(_ node: Node) {
-        // todo create a UIButton
-    }
-}
