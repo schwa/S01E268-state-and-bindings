@@ -1,5 +1,3 @@
-internal import os
-
 @MainActor
 public protocol View {
     associatedtype Body: View
@@ -16,8 +14,6 @@ public extension View where Body == Never {
     }
 }
 
-internal let activeNodeStack = OSAllocatedUnfairLock<[Node]>(uncheckedState: [])
-
 internal extension View {
     func buildNodeTree(_ node: Node) {
         if let builtInView = self as? BuiltinView {
@@ -26,13 +22,9 @@ internal extension View {
             return
         }
 
-        activeNodeStack.withLockUnchecked { activeNodeStack in
-            activeNodeStack.append(node)
-        }
+        Graph.current!.activeNodeStack.append(node)
         defer {
-            activeNodeStack.withLockUnchecked { activeNodeStack in
-                _ = activeNodeStack.removeLast()
-            }
+            _ = Graph.current!.activeNodeStack.removeLast()
         }
 
         let shouldRunBody = node.needsRebuild || !equalToPrevious(node)
@@ -49,7 +41,7 @@ internal extension View {
         restoreStateProperties(node)
 
         if node.children.isEmpty {
-            node.children = [Node()]
+            node.children = [Node(graph: node.graph)]
         }
         body.buildNodeTree(node.children[0])
 

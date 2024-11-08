@@ -62,16 +62,18 @@ struct NotSwiftUIStateTests {
 
     @Test func testUpdate() {
         let v = ContentView()
-        let node = Node()
-        v.buildNodeTree(node)
+
+        let graph = Graph(content: v)
         var button: Button {
-            node.children[0].view as! Button
+            graph.root.children[0].view as! Button
         }
         #expect(button.title == "0")
         button.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
         #expect(button.title == "1")
     }
+
+    // MARK: ObservedObject tests
 
     @Test func testConstantNested() {
         @MainActor struct Nested: View {
@@ -95,15 +97,14 @@ struct NotSwiftUIStateTests {
         }
 
         let v = ContentView()
-        let node = Node()
-        v.buildNodeTree(node)
+        let graph = Graph(content: v)
         #expect(contentViewBodyCount == 1)
         #expect(nestedBodyCount == 1)
         var button: Button {
-            node.children[0].children[0].view as! Button
+            graph.root.children[0].children[0].view as! Button
         }
         button.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
         #expect(contentViewBodyCount == 2)
         #expect(nestedBodyCount == 1)
     }
@@ -131,15 +132,14 @@ struct NotSwiftUIStateTests {
         }
 
         let v = ContentView()
-        let node = Node()
-        v.buildNodeTree(node)
+        let graph = Graph(content: v)
         #expect(contentViewBodyCount == 1)
         #expect(nestedBodyCount == 1)
         var button: Button {
-            node.children[0].children[0].view as! Button
+            graph.root.children[0].children[0].view as! Button
         }
         button.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
         #expect(contentViewBodyCount == 2)
         #expect(nestedBodyCount == 2)
     }
@@ -167,15 +167,14 @@ struct NotSwiftUIStateTests {
         }
 
         let v = ContentView()
-        let node = Node()
-        v.buildNodeTree(node)
+        let graph = Graph(content: v)
         #expect(contentViewBodyCount == 1)
         #expect(nestedBodyCount == 1)
         var button: Button {
-            node.children[0].children[0].view as! Button
+            graph.root.children[0].children[0].view as! Button
         }
         button.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
         #expect(contentViewBodyCount == 2)
         #expect(nestedBodyCount == 1)
     }
@@ -203,15 +202,14 @@ struct NotSwiftUIStateTests {
         }
 
         let v = ContentView()
-        let node = Node()
-        v.buildNodeTree(node)
+        let graph = Graph(content: v)
         #expect(contentViewBodyCount == 1)
         #expect(nestedBodyCount == 1)
         var button: Button {
-            node.children[0].children[0].view as! Button
+            graph.root.children[0].children[0].view as! Button
         }
         button.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
         #expect(contentViewBodyCount == 2)
         #expect(nestedBodyCount == 1)
     }
@@ -239,15 +237,14 @@ struct NotSwiftUIStateTests {
         }
 
         let v = ContentView()
-        let node = Node()
-        v.buildNodeTree(node)
+        let graph = Graph(content: v)
         #expect(contentViewBodyCount == 1)
         #expect(nestedBodyCount == 1)
         var button: Button {
-            node.children[0].children[0].view as! Button
+            graph.root.children[0].children[0].view as! Button
         }
         button.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
         #expect(contentViewBodyCount == 2)
         #expect(nestedBodyCount == 2)
     }
@@ -272,20 +269,21 @@ struct NotSwiftUIStateTests {
         }
 
         let v = ContentView()
-        let node = Node()
-        v.buildNodeTree(node)
+        let graph = Graph(content: v)
         var button: Button {
-            node.children[0].children[0].view as! Button
+            graph.root.children[0].children[0].view as! Button
         }
         #expect(contentViewBodyCount == 1)
         #expect(nestedBodyCount == 1)
         #expect(button.title == "0")
         button.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
         #expect(contentViewBodyCount == 2)
         #expect(nestedBodyCount == 2)
         #expect(button.title == "1")
     }
+
+    // MARK: State tests
 
     @Test func testSimple() {
         struct Nested: View {
@@ -308,13 +306,12 @@ struct NotSwiftUIStateTests {
         }
 
         let s = Sample()
-        let node = Node()
-        s.buildNodeTree(node)
+        let graph = Graph(content: s)
         var button: Button {
-            node.children[0].children[0].view as! Button
+            graph.root.children[0].children[0].view as! Button
         }
         var nestedNode: Node {
-            node.children[0].children[1]
+            graph.root.children[0].children[1]
         }
         var nestedButton: Button {
             nestedNode.children[0].view as! Button
@@ -323,13 +320,13 @@ struct NotSwiftUIStateTests {
         #expect(nestedButton.title == "0")
 
         nestedButton.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
 
         #expect(button.title == "0")
         #expect(nestedButton.title == "1")
 
         button.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
 
         #expect(button.title == "1")
         #expect(nestedButton.title == "1")
@@ -353,10 +350,9 @@ struct NotSwiftUIStateTests {
         }
 
         let s = Sample()
-        let node = Node()
-        s.buildNodeTree(node)
+        let graph = Graph(content: s)
         var nestedNode: Node {
-            node.children[0]
+            graph.root.children[0]
         }
         var nestedButton: Button {
             nestedNode.children[0].view as! Button
@@ -364,8 +360,7 @@ struct NotSwiftUIStateTests {
         #expect(nestedButton.title == "0")
 
         nestedButton.action()
-        node.rebuildIfNeeded()
-
+        graph.rebuildIfNeeded()
         #expect(nestedButton.title == "1")
     }
 
@@ -390,10 +385,9 @@ struct NotSwiftUIStateTests {
         }
 
         let s = Sample()
-        let node = Node()
-        s.buildNodeTree(node)
+        let graph = Graph(content: s)
         var nestedNode: Node {
-            node.children[0].children[1]
+            graph.root.children[0].children[1]
         }
         var nestedButton: Button {
             nestedNode.children[0].view as! Button
@@ -402,7 +396,7 @@ struct NotSwiftUIStateTests {
         #expect(nestedBodyCount == 1)
 
         nestedButton.action()
-        node.rebuildIfNeeded()
+        graph.rebuildIfNeeded()
 
         #expect(sampleBodyCount == 2)
         #expect(nestedBodyCount == 1)

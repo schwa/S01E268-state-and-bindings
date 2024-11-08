@@ -14,7 +14,7 @@ extension TupleView: BuiltinView {
         for child in repeat (each children) {
             let child = AnyBuiltinView(child)
             if node.children.count <= idx {
-                node.children.append(Node())
+                node.children.append(Node(graph: node.graph))
             }
             child._buildNodeTree(node.children[idx])
             idx += 1
