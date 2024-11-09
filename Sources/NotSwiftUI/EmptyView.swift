@@ -2,6 +2,7 @@ public struct EmptyView: View {
     public typealias Body = Never
 
     public init() {
+        // This line intentionally left blank.
     }
 }
 
